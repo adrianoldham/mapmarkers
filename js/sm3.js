@@ -1,14 +1,24 @@
 var SM3 = Class.create({
-    initialize: function(mapCanvas, markers) {
+    initialize: function(mapCanvas, markers, options) {
         this.mapCanvas = $(mapCanvas);
         this.markers = markers;
-        this.viewSize = new GSize(this.mapCanvas.getWidth(), this.mapCanvas.getHeight());
+        this.options = Object.extend(Object.extend({}, SM3  .DefaultOptions), options || {});
         
         if (GBrowserIsCompatible()) {
+            this.viewSize = new GSize(this.mapCanvas.getWidth(), this.mapCanvas.getHeight());
             this.map = new GMap2(this.mapCanvas);
             this.map.setCenter(this.centerOf(this.markers), this.map.getBoundsZoomLevel(this.boundsOf(markers), this.viewSize));
             this.plotMarkers(this.markers);
+            
+            // Removes the focuser if a drag is started
+            GEvent.addListener(this.map, "dragstart", this.focusOff.bind(this));
+            GEvent.addListener(this.map, "click", this.focusOff.bind(this));
+            GEvent.addListener(this.map, "mousedown", this.focusOff.bind(this));
         }
+    },
+    
+    focusOff: function() {
+        if (this.focuser) this.focuser.stop();
     },
     
     focusOn: function(data, zoom) {
@@ -23,16 +33,16 @@ var SM3 = Class.create({
         
         this.current = { point: this.map.getCenter(), zoom: this.map.getZoom() };     
         
-        if (this.focuser) this.focuser.stop();
+        this.focusOff();
         this.focuser = new PeriodicalExecuter(this.update.bind(this), 0.1);
     },
     
     update: function() {
         // Gradually "flow" to the focus point
         var delta = {
-            lat: (this.target.point.lat() - this.current.point.lat()) / 10,
-            lng: (this.target.point.lng() - this.current.point.lng()) / 10,
-            zoom: (this.target.zoom - this.current.zoom) / 10
+            lat: (this.target.point.lat() - this.current.point.lat()) / this.options.focusSpeed,
+            lng: (this.target.point.lng() - this.current.point.lng()) / this.options.focusSpeed,
+            zoom: (this.target.zoom - this.current.zoom) / this.options.focusSpeed
         };
         
         this.current.point = new GLatLng(this.current.point.lat() + delta.lat, this.current.point.lng() + delta.lng);
@@ -68,8 +78,7 @@ var SM3 = Class.create({
             this.map.addOverlay(gMarker);
             
             GEvent.addListener(gMarker,"click", function() {
-                var myHtml = marker.geocode.lat() + ", " + marker.geocode.lng();
-                this.map.openInfoWindowHtml(marker.geocode, myHtml);
+                this.map.openInfoWindowHtml(marker.geocode, marker.info);
             }.bind(this));
         }.bind(this));
     },
@@ -97,5 +106,5 @@ var SM3 = Class.create({
 });
 
 SM3.DefaultOptions = {
-    
+    focusSpeed: 5
 };

@@ -22,11 +22,19 @@
 	        function runTest() {
 				markers = [];
 				for (var i = 0; i < 30; i++) {
-					markers.push({ geocode: new GLatLng(-33 + Math.random() * 2, 150 + Math.random() * 3), category: "Category " + parseInt(i / 6) });
+					markers.push({ 
+						geocode: new GLatLng(-33 + Math.random() * 2, 150 + Math.random() * 3),
+						category: "Category " + parseInt(i / 6),
+						info: i.toString()
+					});
 				}
 				
 				for (var i = 30; i < 60; i++) {
-					markers.push({ geocode: new GLatLng(-33 + Math.random() / 2, 150 + Math.random() / 2), category: "Category " + parseInt(i / 6) });
+					markers.push({
+						geocode: new GLatLng(-33 + Math.random() / 2, 150 + Math.random() / 2),
+						category: "Category " + parseInt(i / 6),
+						info: i.toString()
+					});
 				}				
 
 				for (var i = 0; i < 10; i++) {
