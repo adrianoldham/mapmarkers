@@ -17,6 +17,10 @@ var SM3 = Class.create({
         }
     },
     
+    showMarker: function(marker) {
+        this.activeMarker = marker;
+    },
+    
     focusOff: function() {
         if (this.focuser) this.focuser.stop();
     },
@@ -46,6 +50,15 @@ var SM3 = Class.create({
             lng: (this.target.point.lng() - this.current.point.lng()) / this.options.focusSpeed,
             zoom: (this.target.zoom - this.current.zoom) / this.options.focusSpeed
         };
+        
+        if (this.activeMarker &&
+            ((Math.abs(delta.lat) < this.options.tolerance && Math.abs(delta.lng) < this.options.tolerance)  ||
+            this.map.getBounds().contains(this.activeMarker.geocode))) {
+            this.focusOff();
+            this.map.openInfoWindowHtml(this.activeMarker.geocode, this.activeMarker.info);
+            this.activeMarker = null;
+            return;
+        }
         
         this.current.point = new GLatLng(this.current.point.lat() + delta.lat, this.current.point.lng() + delta.lng);
         this.current.zoom += delta.zoom;
@@ -108,5 +121,6 @@ var SM3 = Class.create({
 });
 
 SM3.DefaultOptions = {
+    tolerance: 0.00005,
     focusSpeed: 5
 };

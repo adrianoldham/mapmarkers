@@ -66,12 +66,13 @@ SM3.Collector.Category = Class.create({
         
         this.selected = false;
         
-        this.setupEvents();
+        this.setupSelector();
         this.setupMarkers();
     },
     
-    setupEvents: function() {
-        this.element.observe("click", function() { this.toggle() }.bind(this));
+    setupSelector: function() {
+        this.selector = this.element.getElementsBySelector("." + this.parent.options.selectorClass).first();
+        this.selector.observe("click", function() { this.toggle() }.bind(this));
     },
     
     setupMarkers: function() {
@@ -79,7 +80,16 @@ SM3.Collector.Category = Class.create({
         
         this.element.getElementsBySelector("." + this.parent.options.markerClass).each(function(marker) {
             var geocode = marker.getElementsBySelector("." + this.parent.options.geocodeClass).first().value.split(",");
-            this.markers.push({ geocode: new GLatLng(geocode.first(), geocode.last()), category: this, info: "" });
+            var info = marker.getElementsBySelector("." + this.parent.options.infoClass).first().innerHTML;
+            
+            var sm3Marker = { geocode: new GLatLng(geocode.first(), geocode.last()), category: this, info: info };
+            
+            this.markers.push(sm3Marker);
+            
+            marker.observe("click", function() {
+                this.select();
+                this.parent.showMarker(sm3Marker);
+            }.bind(this));
         }.bind(this));
     },
     
@@ -113,6 +123,7 @@ SM3.Collector.DefaultOptions = {
     markerClass: "sm3-marker",
     infoClass: "sm3-info",
     categoryClass: "sm3-category",
+    selectorClass: "sm3-selector",
     selectedClass: "sm3-selected",
     multiSelect: true
 };
