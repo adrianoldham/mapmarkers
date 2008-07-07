@@ -2,7 +2,7 @@ var SM3 = Class.create({
     initialize: function(mapCanvas, markers, options) {
         this.mapCanvas = $(mapCanvas);
         this.markers = markers;
-        this.options = Object.extend(Object.extend({}, SM3  .DefaultOptions), options || {});
+        this.options = Object.extend(Object.extend({}, SM3.DefaultOptions), options || {});
         
         if (GBrowserIsCompatible()) {
             this.viewSize = new GSize(this.mapCanvas.getWidth(), this.mapCanvas.getHeight());
@@ -24,6 +24,8 @@ var SM3 = Class.create({
     focusOn: function(data, zoom) {
         if (zoom == null) {
             // if no zoom specified then data is an array of markers, so we focus onto those markers
+            if (data.length == 0) data = this.markers;
+            
             this.target = { point: this.centerOf(data), zoom: this.map.getBoundsZoomLevel(this.boundsOf(data), this.viewSize) };
             this.plotMarkers(data);
         } else {

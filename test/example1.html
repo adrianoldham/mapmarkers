@@ -9,48 +9,106 @@
 	    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSosDVG8KKPE1-m51RBrvYughuyMxQ-i1QfUnH94QxWIa6N4U6MouMmBA" type="text/javascript"></script>
 		<script src="../lib/prototype.js" type="text/javascript" charset="utf-8"></script>
 		<script src="../js/sm3.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../js/sm3collector.js" type="text/javascript" charset="utf-8"></script>
+		<style type="text/css" media="screen">
+			.sm3-selected {
+				background-color: #eee;
+			}
+			
+			.markers {
+				float: right;
+			}
+			
+			.sm3-info {
+				display: none;
+			}
+		</style>
 	</head>
 	
 	<body>
+		<table class="markers">
+			<tbody class="sm3-category">
+				<tr>
+					<td rowspan="3">Category 1</td>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="33, 122.45"/>
+						1
+						<span class="sm3-info">Marker <strong>1</strong></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="33.5, 122.12"/>
+						2
+						<span class="sm3-info">Marker <strong>2</strong></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="33.22, 122.19"/>
+						3
+						<span class="sm3-info">Marker <strong>3</strong></span>
+					</td>
+				</tr>
+			</tbody>
+			<tbody class="sm3-category">
+				<tr>
+					<td rowspan="3">Category 2</td>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="31.2, 122.88"/>
+						4
+						<span class="sm3-info">Marker <strong>4</strong></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="30.3, 122.99"/>
+						5
+						<span class="sm3-info">Marker <strong>5</strong></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="30.8, 122.123"/>
+						6
+						<span class="sm3-info">Marker <strong>6</strong></span>
+					</td>
+				</tr>
+			</tbody>
+			<tbody class="sm3-category">
+				<tr>
+					<td rowspan="3">Category 2</td>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="28.14, 122.28"/>
+						7
+						<span class="sm3-info">Marker <strong>7</strong></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="28.11, 122.59"/>
+						8
+						<span class="sm3-info">Marker <strong>8</strong></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="sm3-marker">
+						<input type="hidden" class="sm3-geocode" value="28.12, 122.723"/>
+						9
+						<span class="sm3-info">Marker <strong>9</strong></span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
 		<div id="map_canvas" style="width: 500px; height: 400px"></div>
-		<div onclick="m3.focusOn(markers)">All</div>
 		
 	    <script type="text/javascript" charset="utf-8">
-			var m3;
+			var sm3;
 			var markers;
 			
 	        function runTest() {
-				markers = [];
-				for (var i = 0; i < 30; i++) {
-					markers.push({ 
-						geocode: new GLatLng(-33 + Math.random() * 2, 150 + Math.random() * 3),
-						category: "Category " + parseInt(i / 6),
-						info: i.toString()
-					});
-				}
-				
-				for (var i = 30; i < 60; i++) {
-					markers.push({
-						geocode: new GLatLng(-33 + Math.random() / 2, 150 + Math.random() / 2),
-						category: "Category " + parseInt(i / 6),
-						info: i.toString()
-					});
-				}				
-
-				for (var i = 0; i < 10; i++) {
-					var element = new Element("div");
-					
-					element.innerHTML = "Category " + i;
-					element.style.cursor = "pointer";
-					
-					element.onclick = function() {
-						m3.focusOn(m3.findMarkers([{ category: this.innerHTML }]));
-					}.bind(element);
-					
-					document.body.appendChild(element);	
-				}
-		
-	            m3 = new SM3('map_canvas', markers);
+	            sm3 = new SM3.Collector('map_canvas');
 	        }
         
 	        Event.observe(window, "load", runTest);
