@@ -26,7 +26,7 @@ var SM3 = Class.create({
         if (this.options.snap) {
             this.openInfo(marker);
         } else {
-            this.activeMarker = marker;   
+            this.currentMarker = this.activeMarker = marker;   
         }
     },
     

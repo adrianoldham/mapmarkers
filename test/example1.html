@@ -108,7 +108,7 @@
 			var markers;
 			
 	        function runTest() {
-	            sm3 = new SM3.Collector('map_canvas');
+	            sm3 = new SM3.Collector('map_canvas', { snap: true });
 	        }
         
 	        Event.observe(window, "load", runTest);
