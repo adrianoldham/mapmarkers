@@ -6,7 +6,7 @@ var SM3 = Class.create({
         
         if (GBrowserIsCompatible()) {
             this.viewSize = new GSize(this.mapCanvas.getWidth(), this.mapCanvas.getHeight());
-            this.map = new GMap2(this.mapCanvas);
+            this.map = new GMap2(this.mapCanvas, this.options.mapOptions);
             this.map.setCenter(this.centerOf(this.markers), this.map.getBoundsZoomLevel(this.boundsOf(markers), this.viewSize));
             this.plotMarkers(this.markers);
             
@@ -17,11 +17,22 @@ var SM3 = Class.create({
         }
     },
     
+    openInfo: function(marker) {
+        this.currentMarker = marker;
+        this.map.openInfoWindowHtml(marker.geocode, marker.info, this.options.infoWindowOptions);    
+    },
+    
     showMarker: function(marker) {
-        this.activeMarker = marker;
+        if (this.options.snap) {
+            this.openInfo(marker);
+        } else {
+            this.activeMarker = marker;   
+        }
     },
     
     focusOff: function() {
+        this.currentMarker = null;
+        
         if (this.focuser) this.focuser.stop();
     },
     
@@ -35,6 +46,12 @@ var SM3 = Class.create({
         } else {
             // otherwise we treat the data as a point to focus to
             this.target = { point: data, zoom: zoom };       
+        }
+        
+        if (this.options.snap) {
+            this.map.setCenter(this.target.point);
+            this.map.setZoom(this.target.zoom);
+            return;
         }
         
         this.current = { point: this.map.getCenter(), zoom: this.map.getZoom() };     
@@ -55,7 +72,7 @@ var SM3 = Class.create({
             ((Math.abs(delta.lat) < this.options.tolerance && Math.abs(delta.lng) < this.options.tolerance)  ||
             this.map.getBounds().contains(this.activeMarker.geocode))) {
             this.focusOff();
-            this.map.openInfoWindowHtml(this.activeMarker.geocode, this.activeMarker.info);
+            this.openInfo(this.activeMarker);
             this.activeMarker = null;
             return;
         }
@@ -88,12 +105,12 @@ var SM3 = Class.create({
         this.map.clearOverlays();
         
         markers.each(function(marker) {
-            var gMarker = new GMarker(marker.geocode);
+            var gMarker = new GMarker(marker.geocode, this.options.markerOptions);
             
             this.map.addOverlay(gMarker);
             
             GEvent.addListener(gMarker,"click", function() {
-                this.map.openInfoWindowHtml(marker.geocode, marker.info);
+                this.openInfo(marker);
             }.bind(this));
         }.bind(this));
     },
@@ -122,5 +139,9 @@ var SM3 = Class.create({
 
 SM3.DefaultOptions = {
     tolerance: 0.00005,
-    focusSpeed: 5
+    focusSpeed: 5,
+    snap: true,
+    markerOptions: {}, // Uses google maps GMarkerOptions (check google API)
+    infoWindowOptions: {}, // Uses google maps GInfoWindowOptions (check google API)
+    mapOptions: {} // Uses google maps GMapOptions (check google API)
 };

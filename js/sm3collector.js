@@ -87,7 +87,8 @@ SM3.Collector.Category = Class.create({
             this.markers.push(sm3Marker);
             
             marker.observe("click", function() {
-                this.select();
+                this.selected = true;
+                if (!this.parent.map.getBounds().contains(sm3Marker.geocode)) this.select();
                 this.parent.showMarker(sm3Marker);
             }.bind(this));
         }.bind(this));
@@ -108,7 +109,12 @@ SM3.Collector.Category = Class.create({
     update: function(selected, doNotDeselectOthers) {
         if (!this.parent.options.multiSelect && !doNotDeselectOthers) this.parent.deselectAll();
         this.selected = selected;
+
+        if (this.parent.currentMarker) {
+            this.parent.currentMarker.category.selected = true;
+        }
         
+        this.parent.focusOff();
         this.parent.focus();
 
         if (this.selected)
