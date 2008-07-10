@@ -36,25 +36,25 @@ SM3.Collector = Class.create(SM3, {
         }.bind(this));
     },
     
-    focus: function() {
+    focus: function(testBounds) {
         var searches = [];
         
         this.selectedCategories().each(function(category) {
             searches.push({ category: category });
         });
         
-        this.focusOn(this.findMarkers(searches));
+        this.focusOn(this.findMarkers(searches), null, testBounds);
     },
     
     selectAll: function() {
         this.categories.each(function(category) {
-            category.select(true);
+            category.select(true, true);
         });
     },
     
     deselectAll: function() {
         this.categories.each(function(category) {
-            category.deselect(true);
+            category.deselect(true, true);
         });
     }
 });
@@ -72,7 +72,13 @@ SM3.Collector.Category = Class.create({
     
     setupSelector: function() {
         this.selector = this.element.getElementsBySelector("." + this.parent.options.selectorClass).first();
-        this.selector.observe("click", function() { this.toggle() }.bind(this));
+        this.selector.observe("click", function() { 
+            if (this.parent.currentMarker && this.parent.currentMarker.category == this) {
+                this.select();
+            } else {
+                this.toggle();
+            }
+        }.bind(this));
     },
     
     setupMarkers: function() {
@@ -87,42 +93,50 @@ SM3.Collector.Category = Class.create({
             this.markers.push(sm3Marker);
             
             marker.observe("click", function() {
-                this.parent.currentMarker = sm3Marker;
-                this.update(true, false, this.parent.map.getBounds().contains(sm3Marker.geocode));
+                //if (!this.parent.map.getBounds().contains(sm3Marker.geocode) && !this.selected) {
+                    this.select(false, false, true);
+                //} else {
+                  /*  this.selected = true;
+                    this.element.addClassName(this.parent.options.selectedClass);
+                    
+                    this.parent.map.setZoom();
+                    this.parent.openInfo(sm3Marker);
+                    this.activeMarker = null;
+                }*/
+                
                 this.parent.showMarker(sm3Marker);
             }.bind(this));
         }.bind(this));
     },
     
-    select: function(doNotDeselectOthers) {
-        this.update(true, doNotDeselectOthers);
+    select: function(doNotDeselectOthers, ignoreFocus, testBounds) {
+        this.update(true, doNotDeselectOthers, ignoreFocus, testBounds);
     },
     
-    deselect: function(doNotDeselectOthers) {
-        this.update(false, doNotDeselectOthers);
+    deselect: function(doNotDeselectOthers, ignoreFocus) {
+        this.update(false, doNotDeselectOthers, ignoreFocus);
     },
     
-    toggle: function(doNotDeselectOthers) {
-        this.update(!this.selected, doNotDeselectOthers);
+    toggle: function(doNotDeselectOthers, ignoreFocus) {
+        this.update(!this.selected, doNotDeselectOthers, ignoreFocus);
     },    
     
-    update: function(selected, doNotDeselectOthers, ignoreFocus) {
+    update: function(selected, doNotDeselectOthers, ignoreFocus, testBounds) {
         if (!this.parent.options.multiSelect && !doNotDeselectOthers) this.parent.deselectAll();
         this.selected = selected;
 
-        if (this.parent.currentMarker && this.parent.currentMarker.category == this) {
-            this.selected = true;
-        }
-        
         if (!ignoreFocus) {
             this.parent.focusOff();
-            this.parent.focus();
+            this.parent.focus(testBounds);
         }
-
+        
         if (this.selected)
             this.element.addClassName(this.parent.options.selectedClass);
         else
             this.element.removeClassName(this.parent.options.selectedClass);
+        
+        this.parent.currentMarker = null;
+        this.parent.activeMarker = null;
     }
 });
 
@@ -133,5 +147,5 @@ SM3.Collector.DefaultOptions = {
     categoryClass: "sm3-category",
     selectorClass: "sm3-selector",
     selectedClass: "sm3-selected",
-    multiSelect: false
+    multiSelect: true
 };

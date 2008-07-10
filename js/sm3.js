@@ -23,20 +23,21 @@ var SM3 = Class.create({
     },
     
     showMarker: function(marker) {
-        if (this.options.snap) {
+        //this.currentMarker = marker;
+        
+        if (this.options.snap || this.actLikeSnap) {
             this.openInfo(marker);
+            this.actLikeSnap = false;
         } else {
-            this.currentMarker = this.activeMarker = marker;   
+            this.activeMarker = marker;
         }
     },
     
     focusOff: function() {
-        this.currentMarker = null;
-        
         if (this.focuser) this.focuser.stop();
     },
     
-    focusOn: function(data, zoom) {
+    focusOn: function(data, zoom, testBounds) {
         if (zoom == null) {
             // if no zoom specified then data is an array of markers, so we focus onto those markers
             if (data.length == 0) data = this.markers;
@@ -48,6 +49,16 @@ var SM3 = Class.create({
             this.target = { point: data, zoom: zoom };       
         }
         
+        if (this.target.zoom > this.options.maxZoom) this.target.zoom = this.options.maxZoom;
+        
+        if (testBounds)
+        {
+            if (this.map.getBounds().contains(this.target.point) && this.target.zoom == this.map.getZoom()) {
+                this.actLikeSnap = true;            
+                return;
+            }
+        }
+        
         if (this.options.snap) {
             this.map.setCenter(this.target.point);
             this.map.setZoom(this.target.zoom);
@@ -57,6 +68,7 @@ var SM3 = Class.create({
         this.current = { point: this.map.getCenter(), zoom: this.map.getZoom() };     
         
         this.focusOff();
+        
         this.focuser = new PeriodicalExecuter(this.update.bind(this), 0.1);
     },
     
@@ -143,5 +155,6 @@ SM3.DefaultOptions = {
     snap: true,
     markerOptions: {}, // Uses google maps GMarkerOptions (check google API)
     infoWindowOptions: {}, // Uses google maps GInfoWindowOptions (check google API)
-    mapOptions: {} // Uses google maps GMapOptions (check google API)
+    mapOptions: {}, // Uses google maps GMapOptions (check google API)
+    maxZoom: 9
 };
