@@ -6,6 +6,27 @@ SM3.Collector = Class.create(SM3, {
         this.collectMarkers();
 
         $super(map, this.markers, this.options);
+        
+        this.setupMarkerRemover();
+    },
+    
+    openInfo: function(marker) {
+        marker.element.addClassName(this.options.selectedClass);
+                
+        this.currentMarker = marker;
+        this.map.openInfoWindowHtml(marker.geocode, marker.info, this.options.infoWindowOptions);    
+    },
+    
+    setupMarkerRemover: function() {
+        var markerRemover = function() {
+            if (this.currentMarker) {
+                this.currentMarker.element.removeClassName(this.options.selectedClass);
+            }
+        }.bind(this);
+        
+        GEvent.addListener(this.map, "dragstart", markerRemover);
+        GEvent.addListener(this.map, "click", markerRemover);            
+        GEvent.addListener(this.map, "mousedown", markerRemover);  
     },
    
     setupCategories: function() {
@@ -88,23 +109,20 @@ SM3.Collector.Category = Class.create({
             var geocode = marker.getElementsBySelector("." + this.parent.options.geocodeClass).first().value.split(",");
             var info = marker.getElementsBySelector("." + this.parent.options.infoClass).first().innerHTML;
             
-            var sm3Marker = { geocode: new GLatLng(geocode.first(), geocode.last()), category: this, info: info };
+            var sm3Marker = { 
+                geocode: new GLatLng(geocode.first(), geocode.last()),
+                category: this,
+                info: info,
+                element: marker
+            };
             
             this.markers.push(sm3Marker);
             
             marker.observe("click", function() {
-                //if (!this.parent.map.getBounds().contains(sm3Marker.geocode) && !this.selected) {
-                    this.select(false, false, true);
-                //} else {
-                  /*  this.selected = true;
-                    this.element.addClassName(this.parent.options.selectedClass);
-                    
-                    this.parent.map.setZoom();
-                    this.parent.openInfo(sm3Marker);
-                    this.activeMarker = null;
-                }*/
-                
+                this.select(false, false, true); 
                 this.parent.showMarker(sm3Marker);
+                
+                sm3Marker.element.addClassName(this.parent.options.selectedClass);
             }.bind(this));
         }.bind(this));
     },
@@ -121,7 +139,11 @@ SM3.Collector.Category = Class.create({
         this.update(!this.selected, doNotDeselectOthers, ignoreFocus);
     },    
     
-    update: function(selected, doNotDeselectOthers, ignoreFocus, testBounds) {
+    update: function(selected, doNotDeselectOthers, ignoreFocus, testBounds) {        
+        this.parent.markers.each(function(m) {
+            m.element.removeClassName(this.parent.options.selectedClass);
+        }.bind(this));
+                        
         if (!this.parent.options.multiSelect && !doNotDeselectOthers) this.parent.deselectAll();
         this.selected = selected;
 
@@ -146,6 +168,6 @@ SM3.Collector.DefaultOptions = {
     infoClass: "sm3-info",
     categoryClass: "sm3-category",
     selectorClass: "sm3-selector",
-    selectedClass: "sm3-selected",
+    selectedClass: "selected",
     multiSelect: true
 };
