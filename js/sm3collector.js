@@ -2,12 +2,52 @@ SM3.Collector = Class.create(SM3, {
     initialize: function($super, map, options) {
         this.options = Object.extend(Object.extend({}, SM3.Collector.DefaultOptions), options || {});
         
+        this.openedElement = document.location.hash.substring(1);
+        
         this.setupCategories();
         this.collectMarkers();
 
         $super(map, this.markers, this.options);
         
         this.setupMarkerRemover();
+        this.useQueryString();
+    },
+    
+    fireEvent: function(element, event) {
+        if (document.createEventObject) {
+            var evt = document.createEventObject();
+            return element.fireEvent('on' + event, evt)
+        }
+        else {
+            var evt = document.createEvent("HTMLEvents");
+            evt.initEvent(event, true, true );
+            return !element.dispatchEvent(evt);
+        }
+    },
+    
+    useQueryString: function() {
+        var url = window.location.toString();
+        
+        url.match(/\?(.+)$/);
+        var params = RegExp.$1;
+
+        var params = params.split("&");
+        var queryStringList = {};
+
+        for(var i = 0; i<params.length; i++) {
+            var tmp = params[i].split("=");
+            queryStringList[tmp[0]] = unescape(tmp[1]);
+        }
+
+        if (queryStringList.marker) {
+            var marker = $(queryStringList.marker);
+            this.fireEvent(marker, "click");
+        }
+        
+        if (queryStringList.category) {
+            var selector = $(queryStringList.category).getElementsBySelector("." + this.options.selectorClass).first();
+            this.fireEvent(selector, "click");
+        }
     },
     
     openInfo: function(marker) {
@@ -139,10 +179,12 @@ SM3.Collector.Category = Class.create({
         this.update(!this.selected, doNotDeselectOthers, ignoreFocus);
     },    
     
-    update: function(selected, doNotDeselectOthers, ignoreFocus, testBounds) {        
-        this.parent.markers.each(function(m) {
-            m.element.removeClassName(this.parent.options.selectedClass);
-        }.bind(this));
+    update: function(selected, doNotDeselectOthers, ignoreFocus, testBounds) {
+        if (this.parent.markers) {
+            this.parent.markers.each(function(m) {
+                m.element.removeClassName(this.parent.options.selectedClass);
+            }.bind(this));
+        }
                         
         if (!this.parent.options.multiSelect && !doNotDeselectOthers) this.parent.deselectAll();
         this.selected = selected;
