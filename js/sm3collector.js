@@ -17,9 +17,8 @@ SM3.Collector = Class.create(SM3, {
         if (document.createEventObject) {
             var evt = document.createEventObject();
             return element.fireEvent('on' + event, evt)
-        }
-        else {
-            var evt = document.createEvent("HTMLEvents");
+        } else {
+            var evt = document.createEvent("MouseEvents");
             evt.initEvent(event, true, true );
             return !element.dispatchEvent(evt);
         }
@@ -34,11 +33,11 @@ SM3.Collector = Class.create(SM3, {
         var params = params.split("&");
         var queryStringList = {};
 
-        for(var i = 0; i<params.length; i++) {
+        for(var i = 0; i < params.length; i++) {
             var tmp = params[i].split("=");
             queryStringList[tmp[0]] = unescape(tmp[1]);
         }
-
+        
         if (queryStringList.marker) {
             var marker = $(queryStringList.marker);
             this.fireEvent(marker, "click");
