@@ -10,7 +10,10 @@ SM3.Collector = Class.create(SM3, {
         $super(map, this.markers, this.options);
         
         this.setupMarkerRemover();
-        this.useQueryString();
+        
+        setTimeout(function() {
+            this.useQueryString();            
+        }.bind(this), 1000);
     },
     
     fireEvent: function(element, event) {
